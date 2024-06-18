@@ -6,8 +6,7 @@ from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 from typing import List
 
-from backend.modules.properties import Property
-##from modules.properties import Property  # Adjust the import as per your file structure
+from backend.modules.properties import properties, Property  # Adjust the import as per your file structure
 
 # Assuming 'Modals' is located at the same level as 'backend/'
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'Modals')))
@@ -32,8 +31,6 @@ class RegisterRequest(BaseModel):
     email: str
     password: str
 
-
-
 # Routes
 @app.get("/", response_class=HTMLResponse)
 def read_root():
@@ -47,26 +44,22 @@ def read_root():
 
 @app.post("/login", response_class=HTMLResponse)
 def login_user(user: LoginRequest):
-    existing_user = user.find_by_email_and_password(user.email, user.password)
-    if existing_user:
-        return HTMLResponse(content="<h1>Logged in successfully!</h1>", status_code=200)
-    else:
-        return HTMLResponse(content="<h1>Invalid credentials</h1>", status_code=401)
+    # Placeholder for user login logic
+    return HTMLResponse(content="<h1>Logged in successfully!</h1>", status_code=200)
 
 @app.post("/register", response_class=HTMLResponse)
 def register_user(user: RegisterRequest):
-    existing_user = user.find_by_email(user.email)
-    if not existing_user:
-        new_user = user(email=user.email, password=user.password)
-        new_user.save()  # Assuming User class has a save method
-        return HTMLResponse(content="<h1>Registration successful!</h1>", status_code=201)
-    else:
-        raise HTTPException(status_code=400, detail="Email already registered")
+    # Placeholder for user registration logic
+    return HTMLResponse(content="<h1>Registration successful!</h1>", status_code=201)
 
-
-
-# Optional: Endpoint to return properties as a plain JSON response
+# Endpoint to return properties as a plain JSON response
 @app.get("/properties")
 def get_properties_plain():
-    properties = Property.find_all()
-    return [{"id": p.id, "image": p.image, "description": p.description, "price": p.price} for p in properties]
+    return properties
+
+@app.get("/properties/{id}")
+async def read_property(id: int):
+    for prop in properties:
+        if prop.id == id:
+            return prop
+    raise HTTPException(status_code=404, detail="Property not found")
